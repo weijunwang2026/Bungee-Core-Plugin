@@ -1,0 +1,14 @@
+games:
+  oceanraiders:
+    servers:
+      - "oc001"
+      - "oc002"
+      - "oc003"
+  desert:
+    servers:
+      - "dc001"
+      - "dc002"
+lobbies:
+  main:
+    servers:
+      - "lobby_roleplay"
