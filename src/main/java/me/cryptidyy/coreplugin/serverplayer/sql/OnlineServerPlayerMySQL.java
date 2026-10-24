@@ -112,7 +112,7 @@ public class OnlineServerPlayerMySQL extends ServerPlayerMySQL implements Online
         playerManager.setLastGameServer(PLAYER.getUniqueId(), currentServer.getInfo().getName());
         //this.setLastGameServer(currentServer.getInfo().getName());
 
-        PLAYER.connect(ProxyServer.getInstance().getServerInfo("lobby_roleplay"));
+        PLAYER.connect(ProxyServer.getInstance().getServerInfo("lobby"));
     }
 
     @Override

@@ -34,7 +34,7 @@ public class Main extends Plugin {
     private SQLHelper sqlHelper;
 
     private boolean isShuttingDown = false;
-
+    private final DataManager serverData = new DataManager(this, "servers.yml");
     public Main()
     {
         instance = this;
@@ -44,14 +44,23 @@ public class Main extends Plugin {
     public void onEnable()
     {
         isShuttingDown = false;
-        this.sqlConnection = new SQLConnection();
+        try {
+            this.sqlConnection = new SQLConnection(this);
+        } catch (Exception e) {
+            getLogger().severe("Please provide sql login information in mysql.yml! Shutting down...");
+            onDisable();
+            return;
+        }
 
-//        this.SQL = new MySQL();
-//
-        connectToSQL();
-//
-//        this.sqlHelper = new SQLHelper(SQL);
-//        getProxy().registerChannel("my:channel");
+        try {
+            connectToSQL();
+        } catch (Exception e) {
+            getLogger().severe("Cannot connect to database. Make sure your database is running and your " +
+                    "login information in mysql.yml is correct.");
+            getLogger().severe("Shutting down...");
+            onDisable();
+            return;
+        }
 
         this.gameServerManagerMySQL = new GameServerManagerMySQL();
         initServerClasses();
@@ -63,10 +72,7 @@ public class Main extends Plugin {
         this.getProxy().getPluginManager().registerListener(this, new JoinEvent(this));
         this.getProxy().getPluginManager().registerListener(this, new LeaveEvent(this));
 
-        //loadGamePlugins();
-
-        DataManager data = new DataManager(this, "servers.yml");
-        gameServerManagerMySQL.registerGameServers(data);
+        gameServerManagerMySQL.registerGameServers(serverData);
 
         String[] nameParam = {"NAME", "VARCHAR(100)"};
         String[] stateParam = {"STATE", "VARCHAR(100)"};
@@ -78,31 +84,21 @@ public class Main extends Plugin {
 
         this.spigotCmdListener = new SpigotCommandListener(this);
         spigotCmdListener.listenForCommands();
-
-        //sqlHelper.createTable("servers", "NAME", nameParam, stateParam, gameStateParam, isStartedParam);
     }
 
     @Override
     public void onDisable()
     {
         isShuttingDown = true;
-        spigotCmdListener.onDisable();
+        if(spigotCmdListener != null)
+            spigotCmdListener.onDisable();
+
         Disabler.getInstance().disableAll();
     }
 
-    private void connectToSQL()
+    private void connectToSQL() throws Exception
     {
-        try
-        {
-            sqlConnection.connect();
-        }
-        catch (ClassNotFoundException | SQLException e)
-        {
-            //Login info incorrect
-            //not using database
-
-            ProxyServer.getInstance().getLogger().info("Database not connected!");
-        }
+        sqlConnection.connect();
 
         if(sqlConnection.isConnected())
         {
@@ -135,4 +131,8 @@ public class Main extends Plugin {
         return this.gameServerManagerMySQL;
     }
 
+    public DataManager getServerData()
+    {
+        return serverData;
+    }
 }

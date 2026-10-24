@@ -11,4 +11,4 @@ games:
 lobbies:
   main:
     servers:
-      - "lobby_roleplay"
+      - "lobby"
